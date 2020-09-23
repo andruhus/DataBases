@@ -166,16 +166,15 @@ void printMenu() {
 	printf("1.\"show-m\" - to look information about all organization in database\n");
 	
 	printf("2.\"get-m ID\" - to look information about organization with ID key\n");
-	printf("3.\"get-s ID\" - to look information about all members in organization with ID key\n");
-	printf("4.\"get-s organizationID memID\" - to look information about member with memID key in organization with organizationID key\n");
-	printf("5.\"insert-m budget address phone\" - to add new organizaton\n");
-	printf("6.\"insert-s organizationID name surname birthdate contribution\" - to add new member record with appropriate information to organization with organizationID\n");
-	printf("7.\"update-m ID\" - to update record of organization with ID\n");
-	printf("8.\"update-s organizationID memID\" - to update record of member with memID in organization with organizationID\n");
-	printf("9.\"delete-m organizationID\" - to delete record with organizationID and all their subrecord\n");
-	printf("10.\"delete-s organizationID memID\" - to delete record of member with memID\n");
-	printf("11.\"clear\" - to erase all the info\n");
-	printf("12. or something else - to exit the menu\n");
+	printf("3.\"get-s organizationID memID\" - to look information about member with memID key in organization with organizationID key\n");
+	printf("4.\"insert-m budget address phone\" - to add new organizaton\n");
+	printf("5.\"insert-s organizationID name surname birthdate contribution\" - to add new member record with appropriate information to organization with organizationID\n");
+	printf("6.\"update-m ID\" - to update record of organization with ID\n");
+	printf("7.\"update-s organizationID memID\" - to update record of member with memID in organization with organizationID\n");
+	printf("8.\"delete-m organizationID\" - to delete record with organizationID and all their subrecord\n");
+	printf("9.\"delete-s organizationID memID\" - to delete record of member with memID\n");
+	printf("10.\"clear\" - to erase all the info\n");
+	printf("11. or something else - to exit the menu\n");
 
 
 
@@ -277,7 +276,7 @@ void deleteEndOfLine(char* string) {
 }
 
 void getRecordFromMemberFile(char command[MAX_LENGTH_OF_COMMAND], char* delims) {
-	char field[MAX_LEN_OF_FIELD];
+	//char field[MAX_LEN_OF_FIELD];
 	char* delim = strtok(command, delims);
 	int id = atoi(strtok(NULL, delims));
 	char* memIDString = strtok(NULL, delims);
@@ -309,8 +308,8 @@ void insertRecordToMemberFile(char command[MAX_LENGTH_OF_COMMAND], char* delims)
 	char* delim = strtok(command, delims);
 	member mem;
 	int masterID = atoi(strtok(NULL, delims));
-	int docID = size_of_MemberFile() + 1;
-	mem.id = docID;
+	int memID = size_of_MemberFile();
+	mem.id = memID;
 	strncpy(mem.name, strtok(NULL, delims), NAME_LEN);
 	strncpy(mem.surname, strtok(NULL, delims), SURNAME_LEN);
 	strncpy(mem.dateOfBirth, strtok(NULL, delims), LENGTH_OF_BIRTH_DATE);
@@ -617,6 +616,8 @@ void removeSubrecord(org* hosp, int slaveID) {
 int size_of_MemberFile()
 {
 	FILE* a = fopen(handler.MemberDataFile, "rb");
+	if (!doesFileHasContent(a))
+		return 0;
 	fseek(a, 0, SEEK_END);
 	int res = ftell(a) / sizeof(member);
 	fclose(a);
