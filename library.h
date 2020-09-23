@@ -37,8 +37,8 @@ typedef struct Organization {
 
 typedef struct FileHandler {
 	FILE* dataIndexFile;
-	FILE* OrganizationDataFile;
 	FILE* MemberDataFile;
+	FILE* OrganizationDataFile;
 	char* indexFileName;
 	char* dataFileName;
 	char* MemberFileName;
@@ -74,5 +74,6 @@ void deleteMemberRecord(char[MAX_LENGTH_OF_COMMAND], char*);
 void removeSubrecord(org*, int);
 int doesFileHasContent(FILE* f);
 int size_of_MemberFile();
+void showMemberFile();
 #endif //LABORATORY1_LIBRARY_H
 

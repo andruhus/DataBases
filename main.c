@@ -41,24 +41,48 @@ void showOrganizationFile() {
 		return;
 	}
 	fseek(handler.OrganizationDataFile, 0L, SEEK_SET);
-	if (feof(handler.OrganizationDataFile))
-	{
-		printf("There is nothing to show\n");
-		return;
-	}
-	for (; !feof(handler.OrganizationDataFile);) {
+	
+	for (; ;) {
 		
 		fread(&organization, sizeof(organization), 1, handler.OrganizationDataFile);
-		
+		if (feof(handler.OrganizationDataFile))
+			break;
 		printf("%d. %d %d %s %s\n", i, organization.id, organization.budget, organization.address, organization.phone);
 		++i;
 	}
 	fclose(handler.OrganizationDataFile);
 }
 
+void showMemberFile()
+{
+	member mem;
+	int i = 1;
+	handler.MemberDataFile = fopen(handler.MemberFileName, "rb");
+	if (!doesFileHasContent(handler.MemberDataFile))
+	{
+		printf("There is nothing to show\n");
+		return;
+	}
+	fseek(handler.MemberDataFile, 0L, SEEK_SET);
+
+	for (; ;) {
+
+		fread(&mem, sizeof(member), 1, handler.MemberDataFile);
+		if (feof(handler.MemberDataFile))
+			break;
+		printf("%d", i);
+		printf(". ");
+		printMemberRecord(&mem);
+		++i;
+	}
+	fclose(handler.MemberDataFile);
+}
+
 void insertToIndexFile(org* newOrganization) {
 	handler.dataIndexFile = fopen(handler.indexFileName, "rb+");
 	int oldIndex;
+	if (!doesFileHasContent(handler.dataIndexFile))
+		oldIndex = 0;
 	fread(&oldIndex, sizeof(int), 1, handler.dataIndexFile);
 	newOrganization->id = oldIndex;
 	fseek(handler.dataIndexFile, 0L, SEEK_SET);
@@ -90,16 +114,16 @@ void insertToMasterFile(char command[MAX_LENGTH_OF_COMMAND]) {
 
 
 void printMasterRecord(int index) {
-	org hospital;
+	org organization;
 	if (index == -1) {
 		printf("No info with such an index\n");
 		return;
 	}
 	handler.OrganizationDataFile = fopen(handler.dataFileName, "rb+");
-	fseek(handler.OrganizationDataFile, index * sizeof(hospital), SEEK_SET);
-	fread(&hospital, sizeof(hospital), 1, handler.OrganizationDataFile);
+	fseek(handler.OrganizationDataFile, index * sizeof(organization), SEEK_SET);
+	fread(&organization, sizeof(organization), 1, handler.OrganizationDataFile);
 	fclose(handler.OrganizationDataFile);
-	printf("ID: %d Budget: %d Address: %s  Phone: %s\n", hospital.id, hospital.budget, hospital.address, hospital.phone);
+	printf("ID: %d Budget: %d Address: %s  Phone: %s\n", organization.id, organization.budget, organization.address, organization.phone);
 }
 
 
@@ -122,6 +146,9 @@ int handleCommand() {
 	char* option = strtok(command, delims);
 	if (!strcmp(option, "show-m")) {
 		showOrganizationFile();
+	}
+	else if (!strcmp(option, "show-s")) {
+		showMemberFile();
 	}
 	else if (!strcmp(option, "insert-m")) {
 		insertToMasterFile(&copyOfcommand);
@@ -164,7 +191,7 @@ void printMenu() {
 	printf("This is a organization database management programm\n");
 	printf("You have next commands available for input:\n");
 	printf("1.\"show-m\" - to look information about all organization in database\n");
-	
+	printf("2.\"show-s\" - to look information about all organization in database\n");
 	printf("2.\"get-m ID\" - to look information about organization with ID key\n");
 	printf("3.\"get-s organizationID memID\" - to look information about member with memID key in organization with organizationID key\n");
 	printf("4.\"insert-m budget address phone\" - to add new organizaton\n");
@@ -216,12 +243,12 @@ void updateOrgFileRecord(char command[MAX_LENGTH_OF_COMMAND], char* delims) {
 	int id = atoi(strtok(NULL, delims));
 	int masterIndex = searchForOrganizationIndex(id);
 
-	org hospital = organizationWithIndex(masterIndex);
+	org organization = organizationWithIndex(masterIndex);
 	printf("Which field of record would you like to update?\n");
 	fgets(field, MAX_LEN_OF_FIELD, stdin);
 	deleteEndOfLine(field);
-	changeOrganizationRecord(&hospital, field);
-	updateRecord(masterIndex, &hospital);
+	changeOrganizationRecord(&organization, field);
+	updateRecord(masterIndex, &organization);
 }
 
 org organizationWithIndex(int index) {
@@ -308,7 +335,7 @@ void insertRecordToMemberFile(char command[MAX_LENGTH_OF_COMMAND], char* delims)
 	char* delim = strtok(command, delims);
 	member mem;
 	int masterID = atoi(strtok(NULL, delims));
-	int memID = size_of_MemberFile();
+	int memID = size_of_MemberFile()+1;
 	mem.id = memID;
 	strncpy(mem.name, strtok(NULL, delims), NAME_LEN);
 	strncpy(mem.surname, strtok(NULL, delims), SURNAME_LEN);
@@ -417,27 +444,27 @@ void changeMemberRecord(member* pMember, char* field) {
 void updateMemberRecord(char command[MAX_LENGTH_OF_COMMAND], char* delims) {
 	char* option = strtok(command, delims);
 	int masterID = atoi(strtok(NULL, delims));
-	int doctorID = atoi(strtok(NULL, delims));
+	int memberID = atoi(strtok(NULL, delims));
 	printf("Which field of record would you like to update?\n");
-	int hospitalIndex = searchForOrganizationIndex(masterID);
-	org hosp = organizationWithIndex(hospitalIndex);
-	member doc = searchInMemberFile(hosp.firstMemberID);
-	while (doc.id != doctorID && doc.id != -1) {
-		doc = searchInMemberFile(doc.nextMemberID);
+	int organizationIndex = searchForOrganizationIndex(masterID);
+	org organ = organizationWithIndex(organizationIndex);
+	member mem = searchInMemberFile(organ.firstMemberID);
+	while (mem.id != memberID && mem.id != -1) {
+		mem = searchInMemberFile(mem.nextMemberID);
 	}
 	char field[MAX_LEN_OF_FIELD];
 	fgets(field, MAX_LEN_OF_FIELD, stdin);
 	deleteEndOfLine(field);
 	
-	changeMemberRecord(&doc, field);
+	changeMemberRecord(&mem, field);
 	handler.MemberDataFile = fopen(handler.MemberFileName, "rb+");
 	for (;;) {
 		member oldRecord;
 		fread(&oldRecord, sizeof(member), 1, handler.MemberDataFile);
 		if (feof(handler.MemberDataFile)) break;
-		if (oldRecord.id == doc.id) {
+		if (oldRecord.id == mem.id) {
 			fseek(handler.MemberDataFile, -1L * (int)sizeof(member), SEEK_CUR);
-			fwrite(&doc, sizeof(member), 1, handler.MemberDataFile);
+			fwrite(&mem, sizeof(member), 1, handler.MemberDataFile);
 			fclose(handler.MemberDataFile);
 			break;
 		}
@@ -510,7 +537,7 @@ void deleteAllSubrecords(int firstDocID) {
 	if (firstDocID != -1) {
 		handler.MemberDataFile = fopen(handler.MemberFileName, "rb");
 		member doc;
-		FILE* doctorsDataTmp = fopen("doctor_tmp.dat", "wb");
+		FILE* doctorsDataTmp = fopen("member_tmp.dat", "wb");
 		for (;;) {
 			fread(&doc, sizeof(member), 1, handler.MemberDataFile);
 			if (feof(handler.MemberDataFile)) break;
@@ -551,17 +578,17 @@ void deleteMemberRecord(char command[MAX_LENGTH_OF_COMMAND], char* delims) {
 void removeSubrecord(org* hosp, int slaveID) {
 	int recordID = hosp->firstMemberID;
 	if (recordID != -1) {
-		member doc;
-		member nextDoctor;
-		member previousDoctor;
+		member mem;
+		member nextMember;
+		member previousMember;
 		handler.MemberDataFile = fopen(handler.MemberFileName, "rb");
 		FILE* doctorDataTemp = fopen("doctor_temp.dat", "wb+");
 		int found = 0;
 		for (;;) {
-			fread(&doc, sizeof(member), 1, handler.MemberDataFile);
+			fread(&mem, sizeof(member), 1, handler.MemberDataFile);
 
 			if (feof(handler.MemberDataFile)) break;
-			if (doc.nextMemberID == -1) {
+			if (mem.nextMemberID == -1) {
 				printf("Record with id: %d deleted\n\n", slaveID);
 				found = 1;
 				member previous;
@@ -574,22 +601,22 @@ void removeSubrecord(org* hosp, int slaveID) {
 				fwrite(&previous, sizeof(member), 1, doctorDataTemp);
 				break;
 			}
-			if (doc.id == slaveID) {
-				fread(&nextDoctor, sizeof(member), 1, handler.MemberDataFile);
+			if (mem.id == slaveID) {
+				fread(&nextMember, sizeof(member), 1, handler.MemberDataFile);
 				fclose(doctorDataTemp);
 				doctorDataTemp = fopen("doctor_temp.dat", "rb+");
 				if (doesFileHasContent(doctorDataTemp)) {
 					fseek(doctorDataTemp, -1 * (int)sizeof(member), SEEK_END);
-					fread(&previousDoctor, sizeof(member), 1, doctorDataTemp);
-					previousDoctor.nextMemberID = nextDoctor.id;
+					fread(&previousMember, sizeof(member), 1, doctorDataTemp);
+					previousMember.nextMemberID = nextMember.id;
 					fseek(handler.MemberDataFile, -1 * (int)sizeof(member), SEEK_CUR);
 					fseek(doctorDataTemp, -1 * (int)sizeof(member), SEEK_END);
-					fwrite(&previousDoctor, sizeof(member), 1, doctorDataTemp);
+					fwrite(&previousMember, sizeof(member), 1, doctorDataTemp);
 					fseek(doctorDataTemp, 0L, SEEK_END);
 				}
 				else {
-					fwrite(&nextDoctor, sizeof(member), 1, doctorDataTemp);
-					hosp->firstMemberID = nextDoctor.id;
+					fwrite(&nextMember, sizeof(member), 1, doctorDataTemp);
+					hosp->firstMemberID = nextMember.id;
 					int index = searchForOrganizationIndex(hosp->id);
 					rewriteOrganizationRecord(*hosp, index);
 					printf("Record with id: %d deleted\n\n", slaveID);
@@ -599,7 +626,7 @@ void removeSubrecord(org* hosp, int slaveID) {
 				found = 1;
 			}
 			else {
-				fwrite(&doc, sizeof(member), 1, doctorDataTemp);
+				fwrite(&mem, sizeof(member), 1, doctorDataTemp);
 			}
 		}
 		if (!found) printf("No record with id: %d\n\n", slaveID);
