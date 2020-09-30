@@ -192,24 +192,7 @@ int SearchForMasterIndex(int masterID)
 	fread((char*)& masterIndex, sizeof(int), 1, handler.dataIndexFile);
 	fclose(handler.dataIndexFile);
 	return masterIndex;
-	/*handler.dataIndexFile = fopen(handler.indexFileName, "rb");
-	fseek(handler.dataIndexFile, sizeof(int), SEEK_SET);
-	int masterIndex = -1;
-	for (;;)
-	{
-		int number;
-		fread(&number, sizeof(int), 1, handler.dataIndexFile);
-		if (feof(handler.dataIndexFile))
-			break;
-		if (number == masterID)
-		{
-			fread(&masterIndex, sizeof(int), 1, handler.dataIndexFile);
-			break;
-		}
-		fseek(handler.dataIndexFile, sizeof(int), SEEK_CUR);
-	}
-	fclose(handler.dataIndexFile);
-	return masterIndex;*/
+	
 }
 
 organization OrganizationWithIndex(int index)
