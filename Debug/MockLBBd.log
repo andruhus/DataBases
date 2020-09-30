@@ -1,9 +1,0 @@
-﻿  main.c
-C:\Users\aaade\source\repos\MockLBBd\main.c(154,36): warning C4047:  'function': 'char *' differs in levels of indirection from 'char (*)[128]'
-C:\Users\aaade\source\repos\MockLBBd\main.c(154,36): warning C4024:  'insertToMasterFile': different types for formal and actual parameter 1
-C:\Users\aaade\source\repos\MockLBBd\main.c(157,41): warning C4047:  'function': 'char *' differs in levels of indirection from 'char (*)[128]'
-C:\Users\aaade\source\repos\MockLBBd\main.c(157,41): warning C4024:  'getRecordFromMasterFile': different types for formal and actual parameter 1
-C:\Users\aaade\source\repos\MockLBBd\main.c(160,37): warning C4047:  'function': 'char *' differs in levels of indirection from 'char (*)[128]'
-C:\Users\aaade\source\repos\MockLBBd\main.c(160,37): warning C4024:  'updateOrgFileRecord': different types for formal and actual parameter 1
-C:\Users\aaade\source\repos\MockLBBd\main.c(645,40): warning C4133:  'function': incompatible types - from 'FILE *' to 'const char *'
-  MockLBBd.vcxproj -> C:\Users\aaade\source\repos\MockLBBd\Debug\MockLBBd.exe
